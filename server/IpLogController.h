@@ -19,7 +19,9 @@ public:
 
 private:
     int ipCmd();
-    int startTcpdump(const char *iface, char *packetSize, char *fileName);
+    //Moto, dbk378, 14/Oct/2013, IKJBMR2-5601:
+    //Data Partition getting filled up during Stability Testing
+    int startTcpdump(const char *iface, char *packetSize, char *fileName, char *totalPackets);
     int stopTcpdump(const char *pid);
     int doIpCommands(const char *cmd);
     char* getDefaultPcapFileName(char* fileNameBuff, int buffSize);

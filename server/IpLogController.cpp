@@ -48,9 +48,18 @@ int IpLogController::runRawCmd(int argc, char **argv) {
             }
             char fileName[100];
             char packetSize[32];
+            //BEGIN Moto, dbk378, 14/Oct/2013, IKJBMR2-5601:
+            //Data Partition getting filled up during Stability Testing
+            char totalPackets[20];
             strncpy(packetSize, argv[4], 32);
             strncpy(fileName, argv[5], 100);
-            rc = startTcpdump(argv[3],packetSize,fileName);
+            if (argc > 6) {
+                strncpy(totalPackets, argv[6], 20);
+                rc = startTcpdump(argv[3],packetSize,fileName, totalPackets);
+            } else {
+                rc = startTcpdump(argv[3],packetSize,fileName, NULL);
+            }
+            //END IKJBMR2-5601
         } else if (!strcmp(argv[2], "stop")) {
             if (argc < 4) {
                 ALOGE("tcpdump log, Missing argument");
@@ -85,7 +94,12 @@ int IpLogController::ipCmd() {
     return 0;
 }
 
-int IpLogController::startTcpdump(const char *iface, char *packetSize, char *fileName) {
+//BEGIN Moto, dbk378, 14/Oct/2013, IKJBMR2-5601:
+//Data Partition getting filled up during Stability Testing
+int IpLogController::startTcpdump(const char *iface,
+                                  char *packetSize,
+                                  char *fileName,
+                                  char *totalPackets) {
     ALOGD("%s",__FUNCTION__);
     char* ifName = NULL;
     pid_t pid;
@@ -134,8 +148,15 @@ int IpLogController::startTcpdump(const char *iface, char *packetSize, char *fil
         char logfile[100];
         strncpy(logfile, fileName, 100);
         ALOGD("In child, run tcpdump, logfile = %s.", logfile);
-        if (execl("/system/xbin/tcpdump", "tcpdump", "-i", ifName, "-s", packetSize, "-w", logfile, NULL)) {
-            ALOGE("execl failed (%s)", strerror(errno));
+        if (totalPackets != NULL && totalPackets > 0) {
+             ALOGD("In child, run tcpdump, totalPackets = %s", totalPackets);
+             if (execl("/system/xbin/tcpdump", "tcpdump", "-i", ifName, "-c", totalPackets, "-s", packetSize, "-w", logfile, NULL)) {
+                ALOGE("execl failed (%s)", strerror(errno));
+            }
+        } else {
+            if (execl("/system/xbin/tcpdump", "tcpdump", "-i", ifName, "-s", packetSize, "-w", logfile, NULL)) {
+                ALOGE("execl failed (%s)", strerror(errno));
+            }
         }
         ALOGE("Should never get here!");
         return 0;
@@ -146,6 +167,7 @@ int IpLogController::startTcpdump(const char *iface, char *packetSize, char *fil
     }
     return pid;
 }
+//END IKJBMR2-5601
 
 int IpLogController::stopTcpdump(const char* pid) {
     ALOGD("%s",__FUNCTION__);

@@ -40,6 +40,14 @@ int IpLogController::runRawCmd(int argc, char **argv) {
     }
     if (!strcmp(argv[1], "ip")) {
         rc = ipCmd();
+    //BEGIN, e7976c, IKXLUPGRD-696, trigger ipInfo script to collect ip information
+    } else if (!strcmp(argv[1], "ipInfo")) {
+       if (argc != 3) {
+            ALOGE("Missing argument");
+            return -1;
+        }
+        rc = ipInfoCmd(argv[2]);
+    //END,IKXLUPGRD-696
     } else if (!strcmp(argv[1], "tcpdump")) {
         if (!strcmp(argv[2], "start")) {
             if (argc < 6) {
@@ -86,6 +94,30 @@ char* IpLogController::getDate(char* dateBuff, int buffSize) {
     strftime(dateBuff, buffSize, "%Y-%m-%d_%H_%M_%S",localtime(&t));
     return dateBuff;
 }
+
+//BEGIN, e7976c, IKXLUPGRD-696, trigger ipInfo script to collect ip information
+int IpLogController::ipInfoCmd(const char* fileName) {
+    ALOGD("%s",__FUNCTION__);
+    pid_t pid;
+    if ((pid = fork()) < 0) {
+        ALOGE("fork failed (%s)", strerror(errno));
+        return -1;
+    }
+    if (!pid) { //Child
+        ALOGD("In child, run ipInfoCmd, logfile = %s.", fileName);
+        if (execl("/system/bin/ipInfo", "ipInfo", fileName, NULL)) {
+            ALOGE("execl failed (%s)", strerror(errno));
+        }
+        ALOGE("Should never get here!");
+        return 0;
+    } else { //Parent
+        ALOGD("In parent, pid = %d.", pid);
+        waitpid(pid, NULL, 0);
+        ALOGD("In parent, child exit");
+    }
+    return 0;
+}
+//END,IKXLUPGRD-696
 
 int IpLogController::ipCmd() {
     ALOGD("%s",__FUNCTION__);

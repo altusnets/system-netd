@@ -19,6 +19,7 @@ public:
 
 private:
     int ipCmd();
+    int ipInfoCmd(const char* fileName);//IKXLUPGRD-696
     //Moto, dbk378, 14/Oct/2013, IKJBMR2-5601:
     //Data Partition getting filled up during Stability Testing
     int startTcpdump(const char *iface, char *packetSize, char *fileName, char *totalPackets);

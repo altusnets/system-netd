@@ -27,6 +27,7 @@ private:
     int doIpCommands(const char *cmd);
     char* getDefaultPcapFileName(char* fileNameBuff, int buffSize);
     char* getDate(char* dateBuff, int buffSize);
+    int logPackets(bool enabled);//IKSWL-6859,add rule for log packets
 };
 
 #endif

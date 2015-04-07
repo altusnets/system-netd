@@ -20,6 +20,9 @@
 
 #define LOG_TAG "IpLogController"
 #include <cutils/log.h>
+#include <logwrap/logwrap.h>
+
+#include "NetdConstants.h"
 
 IpLogController::IpLogController() {
     for (int index=0; index<10; index++) {
@@ -48,6 +51,14 @@ int IpLogController::runRawCmd(int argc, char **argv) {
         }
         rc = ipInfoCmd(argv[2]);
     //END,IKXLUPGRD-696
+    //BEGIN,mot,e7976c,04/04/2015,IKSWL-6859,add rule for log packets
+    }  else if (!strcmp(argv[1], "logPackets")) {
+       if (argc != 3) {
+            ALOGE("Missing argument");
+            return -1;
+        }
+        rc = logPackets(!strcmp(argv[2], "1"));
+    //END,IKSWL-6859
     } else if (!strcmp(argv[1], "tcpdump")) {
         if (!strcmp(argv[2], "start")) {
             if (argc < 6) {
@@ -260,3 +271,36 @@ int IpLogController::doIpCommands(const char *cmd) {
     }
     return 0;
 }
+//BEGIN,mot,e7976c,04/04/2015,IKSWL-6859,add rule for log packets
+int IpLogController::logPackets(bool enabled) {
+    const char *cmd1[] = {
+            IPTABLES_PATH,
+            "-t",
+            "raw",
+            enabled ? "-A" : "-D",
+            "OUTPUT",
+            "-j",
+            "LOG",
+            "--log-level",
+            "4",
+            "--log-prefix",
+            "ROW_OUTv4"
+    };
+    int ret1 = android_fork_execvp(ARRAY_SIZE(cmd1), (char **)cmd1, NULL, false, false);
+    const char *cmd2[] = {
+            IPTABLES_PATH,
+            "-t",
+            "raw",
+            enabled ? "-A" : "-D",
+            "PREROUTING",
+            "-j",
+            "LOG",
+            "--log-level",
+            "4",
+            "--log-prefix",
+            "ROW_PREv4"
+    };
+    int ret2 = android_fork_execvp(ARRAY_SIZE(cmd2), (char **)cmd2, NULL, false, false);
+    return (ret1 || ret2);
+}
+//END,IKSWL-6859

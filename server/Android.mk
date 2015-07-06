@@ -134,6 +134,7 @@ LOCAL_SRC_FILES := \
         ThrottleController.cpp \
         PPPOEController.cpp \
         PerfController.cpp \
+        IpLogController.cpp
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/binder
 

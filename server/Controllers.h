@@ -37,6 +37,7 @@
 #include "ThroughputMonitor.h"
 #include "ThrottleController.h"
 #include "PerfController.h"
+#include "IpLogController.h"
 
 namespace android {
 namespace net {
@@ -61,6 +62,7 @@ struct Controllers {
     ThroughputMonitor throughputMonitor;
     ThrottleController throttleCtrl;
     PerfController perfCtrl;
+    IpLogController ipLogCtrl;
 
 };
 

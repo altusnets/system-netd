@@ -45,6 +45,7 @@
 #include "ThrottleController.h"
 #include "IPv6TetherController.h"
 #include "PerfController.h"
+#include "IpLogController.h" // Motorola, <w20580>, <2010/10/15>, <IKHALFMWK-43> / <add ip related log and tcpdump log in netd>
 
 class CommandListener : public FrameworkListener {
 public:
@@ -105,6 +106,15 @@ private:
         virtual ~PppdCmd() {}
         int runCommand(SocketClient *c, int argc, char ** argv);
     };
+
+    // BEGIN MOTO IKHALFMWK-43 add ip related log and tcpdump log in netd
+    class IpLogCmd : public NetdCommand {
+    public:
+        IpLogCmd();
+        virtual ~IpLogCmd() {}
+        int runCommand(SocketClient *c, int argc, char ** argv);
+    };
+    // END IKHALFMWK-43
 
     class BandwidthControlCmd : public NetdCommand {
     public:

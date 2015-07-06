@@ -54,6 +54,8 @@ public:
     static const int NetInfoSipResult          = 250;
     static const int NetInfoSipError           = 251;
 
+    static const int RunIpLogCmdResult         = 301; // Moto,e7976c,09/11/2012,IKMAINJB-10
+
     // 400 series - The command was accepted but the requested action
     // did not take place.
     static const int OperationFailed           = 400;

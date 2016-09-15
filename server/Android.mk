@@ -127,7 +127,7 @@ LOCAL_SRC_FILES := \
         VirtualNetwork.cpp \
         main.cpp \
         oem_iptables_hook.cpp \
-        binder/android/net/metrics/IDnsEventListener.aidl \
+        binder/android/net/metrics/INetdEventListener.aidl \
         IPv6TetherController.cpp \
         NetInfoListener.cpp \
         ThroughputMonitor.cpp \

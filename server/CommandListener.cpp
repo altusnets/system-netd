@@ -226,6 +226,7 @@ CommandListener::CommandListener() :
     registerLockingCmd(new ThroughputCmd());
     registerLockingCmd(new PPPOEctlCmd());
     registerLockingCmd(new NetInfoCmd());
+    registerLockingCmd(new IpLogCmd()); // IKHALFMWK-43 add ip related log and tcpdump log in netd
 
 
     /*
@@ -963,6 +964,32 @@ bool CommandListener::ResolverCmd::parseAndExecuteSetNetDns(int netId, int argc,
     }
     return gCtls->resolverCtrl.setDnsServers(netId, argv[3], &argv[4], end - 4, paramsPtr) == 0;
 }
+
+// BEGIN MOTO IKHALFMWK-43 add ip related log and tcpdump log in netd
+CommandListener::IpLogCmd::IpLogCmd() :
+                 NetdCommand("iplog") {
+}
+
+int CommandListener::IpLogCmd::runCommand(SocketClient *cli,
+                                                      int argc, char **argv) {
+    int rc = 0;
+
+    rc = gCtls->ipLogCtrl.runRawCmd(argc, argv);
+    //BEGIN MOTO e7976c 09/11/2012 IKMAINJB-10 iplog support multi-session
+    if (rc >= 0) {
+        char *msg = NULL;
+        asprintf(&msg, "%d", rc);
+        ALOGW("code=%d, result=%d", ResponseCode::RunIpLogCmdResult, rc);
+        cli->sendMsg(ResponseCode::RunIpLogCmdResult, msg, false);
+        free(msg);
+    //END IKMAINJB-10
+    } else {
+        cli->sendMsg(ResponseCode::OperationFailed, "IpLog operation failed", true);
+    }
+
+    return 0;
+}
+// END IKHALFMWK-43
 
 CommandListener::BandwidthControlCmd::BandwidthControlCmd() :
     NetdCommand("bandwidth") {

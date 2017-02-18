@@ -142,7 +142,7 @@ void NetlinkHandler::onEvent(NetlinkEvent *evt) {
         //    notifyAddressChanged(NetlinkEvent::Action::kAddressRemoved, "FE80::22/64", iface, "01", "01","-1");
         }
 
-    } else if (!strcmp(subsys, "qlog")) {
+    } else if (!strcmp(subsys, "qlog") || !strcmp(subsys, "xt_quota2")) {
         const char *alertName = evt->findParam("ALERT_NAME");
         const char *iface = evt->findParam("INTERFACE");
         notifyQuotaLimitReached(alertName, iface);

@@ -24,6 +24,8 @@
 
 #include <string>
 #include <list>
+#include <ifaddrs.h>
+#include <netdb.h>
 #include <stdarg.h>
 
 #include <chrono>
@@ -88,6 +90,28 @@ public:
 private:
     std::chrono::time_point<std::chrono::steady_clock> mStart;
 };
+
+
+struct AddrinfoDeleter {
+    void operator()(struct addrinfo* p) const {
+        if (p != nullptr) {
+            freeaddrinfo(p);
+        }
+    }
+};
+
+typedef std::unique_ptr<struct addrinfo, struct AddrinfoDeleter> ScopedAddrinfo;
+
+
+struct IfaddrsDeleter {
+    void operator()(struct ifaddrs *p) const {
+        if (p != nullptr) {
+            freeifaddrs(p);
+        }
+    }
+};
+
+typedef std::unique_ptr<struct ifaddrs, struct IfaddrsDeleter> ScopedIfaddrs;
 
 namespace android {
 namespace net {

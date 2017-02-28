@@ -134,7 +134,8 @@ int SoftapController::setSoftap(int argc, char *argv[]) {
 
 #ifndef MTK_TC1_FEATURE
     char ap_channel[PROPERTY_VALUE_MAX] = {'\0'};
-    const char AP_CHANNEL_PROP_NAME[]="wifi.tethering.channel";
+    // MOT MHS Certification for social channels
+    const char AP_CHANNEL_PROP_NAME[]="moto.wifi.cert.ch";
 #endif
 
     if (argc < 5) {

@@ -166,10 +166,12 @@ int FirewallController::enableChildChains(ChildChain chain, bool enable) {
     }
 
     if (enable) {
-        res |= attachChain(name, LOCAL_INPUT);
+        if(chain != DOZABLE)
+            res |= attachChain(name, LOCAL_INPUT);
         res |= attachChain(name, LOCAL_OUTPUT);
     } else {
-        res |= detachChain(name, LOCAL_INPUT);
+        if(chain != DOZABLE)
+            res |= detachChain(name, LOCAL_INPUT);
         res |= detachChain(name, LOCAL_OUTPUT);
     }
     return res;

@@ -166,12 +166,16 @@ int FirewallController::enableChildChains(ChildChain chain, bool enable) {
     }
 
     if (enable) {
+    //BEGIN Lenovo lubm1 2017-06-08 IKANGEROW-6264 VoLTE re-registration fails during idle.
+    //SIP msg from NW is dropped in DOZABLE chain,
+    //so DUT is not able to continue re-registration upon re-reg timer expiration.
         if(chain != DOZABLE)
             res |= attachChain(name, LOCAL_INPUT);
         res |= attachChain(name, LOCAL_OUTPUT);
     } else {
         if(chain != DOZABLE)
             res |= detachChain(name, LOCAL_INPUT);
+    //END IKANGEROW-6264
         res |= detachChain(name, LOCAL_OUTPUT);
     }
     return res;

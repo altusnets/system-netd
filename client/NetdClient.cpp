@@ -88,13 +88,21 @@ char BlockAppList[][32] = {
 };
 
 
+
 int netdClientConnect(int sockfd, const sockaddr* addr, socklen_t addrlen) {
-
-    const char *benchmark_prop_default_name = "ro.vendor.net.upload.benchmark.default";
     char benchmark_prop_default_value[PROPERTY_VALUE_MAX] = {0};
+    static bool flag = true;
+    static bool block_feature_enable = false;
 
-    if (property_get(benchmark_prop_default_name,benchmark_prop_default_value,NULL)) {
-
+    if (flag) {
+        flag = false;
+        if (property_get("ro.vendor.net.upload.benchmark.default",
+                         benchmark_prop_default_value, NULL))
+            block_feature_enable = true;
+        else
+            block_feature_enable = false;
+    }
+    if (block_feature_enable) {
         char path[32];
         char line[32];
         int fd = 0;
@@ -114,7 +122,7 @@ int netdClientConnect(int sockfd, const sockaddr* addr, socklen_t addrlen) {
             }
             close(fd);
         }
-  }
+    }
 
     const bool shouldSetFwmark = (sockfd >= 0) && addr
             && FwmarkClient::shouldSetFwmark(addr->sa_family);

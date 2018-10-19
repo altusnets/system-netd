@@ -234,12 +234,17 @@ int TetherController::startTethering(int num_addrs, char **dhcp_ranges) {
             "--user", kDnsmasqUsername,
         };
 
+        // TINNO BEGIN
+        // qiaorong.wang add for DHCP TIME,CDAAOB-699,DATE20180104
+        char set_dhcptime[PROPERTY_VALUE_MAX];
+        property_get("ro.pt.dhcp_time", set_dhcptime, "1");
+        ALOGE("ro.pt.dhcp_time=%s",set_dhcptime);
         for (int addrIndex = 0; addrIndex < num_addrs; addrIndex += 2) {
             argVector.push_back(
-                    StringPrintf("--dhcp-range=%s,%s,1h",
-                                 dhcp_ranges[addrIndex], dhcp_ranges[addrIndex+1]));
+                    StringPrintf("--dhcp-range=%s,%s,%sh",
+                                 dhcp_ranges[addrIndex], dhcp_ranges[addrIndex+1], set_dhcptime));
         }
-
+        // TINNO END
         auto args = (char**)std::calloc(argVector.size() + 1, sizeof(char*));
         for (unsigned i = 0; i < argVector.size(); i++) {
             args[i] = (char*)argVector[i].c_str();

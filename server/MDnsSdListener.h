@@ -68,9 +68,11 @@ public:
     };
 
 private:
+    pthread_mutex_t mDNSServiceRefMutex;
+
     class Monitor {
     public:
-        Monitor();
+        Monitor(MDnsSdListener *listener);
         virtual ~Monitor() {}
         DNSServiceRef *allocateServiceRef(int id, Context *c);
         void startMonitoring(int id);
@@ -100,6 +102,7 @@ private:
         int mPollSize;
         int mCtrlSocketPair[2];
         pthread_mutex_t mHeadMutex;
+        MDnsSdListener *mListener;
     };
 
     class Handler : public NetdCommand {

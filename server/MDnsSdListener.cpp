@@ -46,8 +46,9 @@
 #define CEIL(x, y) (((x) + (y) - 1) / (y))
 
 MDnsSdListener::MDnsSdListener() : FrameworkListener(SOCKET_NAME, true) {
-    Monitor *m = new Monitor();
+    Monitor *m = new Monitor(this);
     registerCmd(new Handler(m, this));
+    pthread_mutex_init(&mDNSServiceRefMutex, NULL);
 }
 
 MDnsSdListener::Handler::Handler(Monitor *m, MDnsSdListener *listener) :
@@ -146,8 +147,10 @@ void MDnsSdListener::Handler::stop(SocketClient *cli, int argc, char **argv, con
         return;
     }
     if (VDBG) ALOGD("Stopping %s with ref %p", str, ref);
+    pthread_mutex_lock(&mListener->mDNSServiceRefMutex);
     DNSServiceRefDeallocate(*ref);
     mMonitor->freeServiceRef(requestId);
+    pthread_mutex_unlock(&mListener->mDNSServiceRefMutex);
     char *msg;
     asprintf(&msg, "%s stopped", str);
     cli->sendMsg(ResponseCode::CommandOkay, msg, false);
@@ -515,12 +518,13 @@ int MDnsSdListener::Handler::runCommand(SocketClient *cli,
     return 0;
 }
 
-MDnsSdListener::Monitor::Monitor() {
+MDnsSdListener::Monitor::Monitor(MDnsSdListener *listener) {
     mHead = NULL;
     mLiveCount = 0;
     mPollFds = NULL;
     mPollRefs = NULL;
     mPollSize = 10;
+    mListener = listener;
     socketpair(AF_LOCAL, SOCK_STREAM, 0, mCtrlSocketPair);
     pthread_mutex_init(&mHeadMutex, NULL);
 
@@ -610,7 +614,9 @@ void MDnsSdListener::Monitor::run() {
                         ALOGD("Monitor found [%d].revents = %d - calling ProcessResults",
                                 i, mPollFds[i].revents);
                     }
+                    pthread_mutex_lock(&mListener->mDNSServiceRefMutex);
                     DNSServiceProcessResult(*(mPollRefs[i]));
+                    pthread_mutex_unlock(&mListener->mDNSServiceRefMutex);
                     mPollFds[i].revents = 0;
                 }
             }

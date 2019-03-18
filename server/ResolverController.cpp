@@ -386,6 +386,7 @@ ResolverController::getPrivateDnsStatus(unsigned netId) const {
 }
 
 int ResolverController::clearDnsServers(unsigned netId) {
+    // It will create the cache if it doesn't exist.
     _resolv_set_nameservers_for_net(netId, NULL, 0, "", NULL);
     if (DBG) {
         ALOGD("clearDnsServers netId = %u\n", netId);

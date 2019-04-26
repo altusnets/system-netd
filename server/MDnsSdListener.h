@@ -68,11 +68,9 @@ public:
     };
 
 private:
-    pthread_mutex_t mDNSServiceRefMutex;
-
     class Monitor {
     public:
-        Monitor(MDnsSdListener *listener);
+        Monitor();
         virtual ~Monitor() {}
         DNSServiceRef *allocateServiceRef(int id, Context *c);
         void startMonitoring(int id);
@@ -81,8 +79,9 @@ private:
         int startService();
         int stopService();
         void run();
+        void deallocateServiceRef(DNSServiceRef* ref);
 
-    private:
+      private:
         int rescan(); // returns the number of elements in the poll
         class Element {
         public:
@@ -102,7 +101,6 @@ private:
         int mPollSize;
         int mCtrlSocketPair[2];
         pthread_mutex_t mHeadMutex;
-        MDnsSdListener *mListener;
     };
 
     class Handler : public NetdCommand {
